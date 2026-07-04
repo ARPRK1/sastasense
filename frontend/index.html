@@ -2,52 +2,176 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SastaSense — smart India price comparison</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="description" content="SastaSense — compare live prices across Amazon.in, Flipkart, Croma & Reliance Digital. See real price history, spot genuine deals, and get alerted the moment a price drops." />
+  <title>SastaSense — Know the real price before you buy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <span class="logo">🛍️</span>
-      <div>
-        <h1>SastaSense</h1>
-        <p class="tag">Smart price sense • honest deal check • reliable price-drop alerts</p>
-      </div>
-    </div>
-    <nav>
-      <button class="navbtn active" data-view="search">Search</button>
-      <button class="navbtn" data-view="alerts">My Alerts <span id="alertCount" class="pill"></span></button>
+  <!-- ================= HEADER ================= -->
+  <header class="nav">
+    <a href="#top" class="brand">
+      <span class="brand-logo">🛍️</span>
+      <span class="brand-name">Sasta<span class="accent">Sense</span></span>
+    </a>
+    <nav class="nav-links">
+      <a href="#how" class="nav-link hide-sm">How it works</a>
+      <a href="#why" class="nav-link hide-sm">Why us</a>
+      <a href="#faq" class="nav-link hide-sm">FAQ</a>
+      <button class="nav-link" data-view="alerts">My Alerts <span id="alertCount" class="pill"></span></button>
+      <button class="btn-primary btn-sm" data-scroll="search">Search now</button>
     </nav>
   </header>
 
-  <!-- SEARCH VIEW -->
-  <main id="view-search" class="view">
-    <form id="searchForm" class="searchbar">
-      <input id="searchInput" type="text" placeholder="Search a product, e.g. iPhone 15, Sony headphones, 55 inch TV" autocomplete="off" />
-      <button type="submit">Search</button>
-    </form>
+  <!-- ================= APP / RESULTS VIEW ================= -->
+  <main id="view-search">
 
-    <div id="statusLine" class="statusline"></div>
-    <div id="results" class="results"></div>
-    <div id="emptyState" class="empty">
-      <p>Search any product to compare live prices across Amazon.in, Flipkart, Croma and Reliance Digital.</p>
-      <p class="hint">Try: <button class="chip">iPhone 15</button><button class="chip">Sony headphones</button><button class="chip">55 inch TV</button><button class="chip">Samsung Galaxy</button></p>
+    <!-- ---------- HERO ---------- -->
+    <section id="top" class="hero">
+      <div class="hero-glow"></div>
+      <div class="hero-inner">
+        <span class="eyebrow">✨ Live prices across India's top stores</span>
+        <h1 class="hero-title">Stop guessing.<br><span class="grad">Know the real price</span> before you buy.</h1>
+        <p class="hero-sub">
+          One search compares live prices on <b>Amazon.in, Flipkart, Croma &amp; Reliance Digital</b>,
+          shows the real price history, and tells you if that “deal” is actually a deal —
+          then pings you the moment it drops.
+        </p>
+
+        <form id="searchForm" class="hero-search">
+          <span class="search-ic">🔎</span>
+          <input id="searchInput" type="text" enterkeyhint="search"
+                 placeholder="Search any product — iPhone 15, Sony headphones, 55&quot; TV…" autocomplete="off" />
+          <button type="submit" class="btn-primary">Compare prices</button>
+        </form>
+
+        <div id="categoryRow" class="category-row"></div>
+
+        <div class="trust">
+          <span>🔒 No sign-up to search</span>
+          <span>🏷️ Honest deal check</span>
+          <span>🔔 Free price-drop alerts</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- SEARCH RESULTS (revealed after searching) ---------- -->
+    <section id="resultsSection" class="results-section hidden">
+      <div class="wrap">
+        <div id="statusLine" class="statusline"></div>
+        <div id="results" class="results"></div>
+      </div>
+    </section>
+
+    <!-- ---------- HOW IT WORKS ---------- -->
+    <section id="how" class="band">
+      <div class="wrap">
+        <h2 class="h2">Save money in three taps</h2>
+        <p class="lead">No more opening five tabs and second-guessing yourself.</p>
+        <div class="steps">
+          <div class="step"><div class="step-n">1</div><h3>Search once</h3>
+            <p>Type a product. We fetch live prices from every major India store at the same time.</p></div>
+          <div class="step"><div class="step-n">2</div><h3>See the truth</h3>
+            <p>Real price history and a plain-English verdict: is this genuinely cheap, or a fake “MRP” discount?</p></div>
+          <div class="step"><div class="step-n">3</div><h3>Get the drop</h3>
+            <p>Set your target price. We watch it around the clock and alert you the instant it falls.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- WHY / PROBLEM-SOLUTION ---------- -->
+    <section id="why" class="band alt">
+      <div class="wrap">
+        <h2 class="h2">Most “deals” are designed to fool you</h2>
+        <p class="lead">Inflated MRPs. Prices that jump right before a “sale”. Trackers that show the wrong product.
+          SastaSense was built to fix exactly what shoppers hate.</p>
+        <div class="features">
+          <div class="feat"><span class="feat-ic">🎯</span><h3>Right product, every time</h3>
+            <p>Smart matching filters out look-alikes, so you compare the <i>same</i> item — not a random accessory.</p></div>
+          <div class="feat"><span class="feat-ic">📈</span><h3>Real price history</h3>
+            <p>A clear graph of what it actually cost over time — instantly see if a “50% off” is real.</p></div>
+          <div class="feat"><span class="feat-ic">🏅</span><h3>Genuine-deal score</h3>
+            <p>We compare today’s price to its own past, and flag inflated-MRP tricks. No guesswork.</p></div>
+          <div class="feat"><span class="feat-ic">🔔</span><h3>Alerts that actually fire</h3>
+            <p>Set multiple target prices per product and delete them in one tap. Reliable, on time, yours.</p></div>
+          <div class="feat"><span class="feat-ic">🕒</span><h3>Fresh, not stale</h3>
+            <p>Every price is stamped “just updated” so you never click through to a surprise.</p></div>
+          <div class="feat"><span class="feat-ic">🧼</span><h3>Clean &amp; ad-free</h3>
+            <p>No clutter, no pop-ups. Fast search and a layout that gets out of your way.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PROOF / DEAL EXPLAINER ---------- -->
+    <section class="band">
+      <div class="wrap proof">
+        <div class="proof-copy">
+          <h2 class="h2">“Is this discount real?” — answered.</h2>
+          <p class="lead">The feature shoppers love most, made honest. SastaSense reads a product’s own
+            price history and gives you a verdict you can trust in a second.</p>
+          <ul class="ticks">
+            <li><b>Lowest we've seen</b> — grab it now.</li>
+            <li><b>Below usual</b> — a solid time to buy.</li>
+            <li><b>Pricier than usual</b> — maybe wait.</li>
+            <li><b>Inflated MRP</b> — the “discount” is a mirage.</li>
+          </ul>
+          <button class="btn-primary" data-scroll="search">Try it now →</button>
+        </div>
+        <div class="proof-card">
+          <div class="pc-top"><span class="pc-title">Sony WH-1000XM5</span><span class="badge b-great">Lowest we've seen</span></div>
+          <div class="pc-price">₹22,990 <span class="pc-mrp">₹34,990</span></div>
+          <div class="pc-spark"><svg viewBox="0 0 300 90" preserveAspectRatio="none">
+            <polyline points="0,20 40,25 80,15 120,40 160,35 200,55 240,60 300,80"
+              fill="none" stroke="url(#g)" stroke-width="3"/>
+            <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#28d980"/></linearGradient></defs>
+          </svg></div>
+          <div class="pc-foot"><span>90-day low</span><span class="pc-badge">Just updated</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- FAQ ---------- -->
+    <section id="faq" class="band alt">
+      <div class="wrap narrow">
+        <h2 class="h2">Questions, answered</h2>
+        <div class="faq">
+          <details><summary>Is SastaSense free?</summary><p>Yes. Searching, price history, and price-drop alerts are all free. There are no ads and no account needed to search.</p></details>
+          <details><summary>Which stores do you compare?</summary><p>Amazon.in, Flipkart, Croma and Reliance Digital today — with more on the way. You always see which store has the best price highlighted.</p></details>
+          <details><summary>How do price-drop alerts work?</summary><p>Open any product, set your target price (add as many as you like), and we watch it in the background. When it hits your price, your alert fires — and can email you too.</p></details>
+          <details><summary>Why do some results say “demo”?</summary><p>When a store temporarily blocks automated requests, we show clearly-labelled sample data so the page never breaks. Real listings always take priority over sample ones.</p></details>
+          <details><summary>How accurate are the prices?</summary><p>Every price is stamped with when it was fetched, so you always know how fresh it is. Click through to confirm before buying — prices can change any minute.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- FOOTER CTA ---------- -->
+    <section class="cta-band">
+      <div class="wrap center">
+        <h2 class="h2 white">Never overpay again.</h2>
+        <p class="lead white">Your next purchase could be cheaper in 5 seconds. Go on — try a product.</p>
+        <button class="btn-light" data-scroll="search">Compare a price now</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= ALERTS VIEW ================= -->
+  <main id="view-alerts" class="view hidden">
+    <div class="wrap">
+      <h2 class="h2">My price alerts</h2>
+      <p class="lead">We ping you the moment a tracked product hits your target. Set as many as you like.</p>
+      <div id="alertsList" class="alerts-list"></div>
     </div>
   </main>
 
-  <!-- ALERTS VIEW -->
-  <main id="view-alerts" class="view hidden">
-    <h2>My price alerts</h2>
-    <p class="muted">You get notified the moment a tracked product hits your target. Set as many targets per product as you like.</p>
-    <div id="alertsList" class="alerts-list"></div>
-  </main>
-
-  <!-- PRODUCT / HISTORY MODAL -->
+  <!-- ================= PRODUCT MODAL ================= -->
   <div id="modal" class="modal hidden">
     <div class="modal-card">
-      <button id="modalClose" class="modal-close">✕</button>
+      <button id="modalClose" class="modal-close" aria-label="Close">✕</button>
       <div class="modal-head">
         <img id="mImg" alt="" />
         <div>
@@ -58,14 +182,13 @@
       </div>
       <div class="chart-wrap"><canvas id="historyChart"></canvas></div>
       <div id="mStats" class="stats-row"></div>
-
       <div class="alert-box">
-        <h4>Notify me when price drops to</h4>
+        <h4>🔔 Notify me when the price drops to</h4>
         <div class="alert-form">
           <span class="rupee">₹</span>
-          <input id="targetPrice" type="number" min="1" placeholder="target price" />
+          <input id="targetPrice" type="number" min="1" inputmode="numeric" placeholder="target price" />
           <input id="alertEmail" type="email" placeholder="email (optional)" />
-          <button id="addAlertBtn">Add alert</button>
+          <button id="addAlertBtn" class="btn-primary">Add alert</button>
         </div>
         <div id="productAlerts" class="mini-alerts"></div>
       </div>
@@ -75,7 +198,9 @@
   <div id="toast" class="toast hidden"></div>
 
   <footer class="foot">
-    <span id="footInfo"></span>
+    <div class="foot-brand">🛍️ Sasta<span class="accent">Sense</span></div>
+    <p id="footInfo" class="muted"></p>
+    <p class="muted tiny">Prices are indicative and can change any time — always confirm on the store before buying.</p>
   </footer>
 
   <script src="/static/app.js"></script>
