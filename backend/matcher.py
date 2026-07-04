@@ -15,12 +15,30 @@ from rapidfuzz import fuzz
 
 _STOP = {"the", "with", "and", "for", "new", "latest", "buy", "online", "combo"}
 _UNIT = re.compile(r"\b(\d+)\s?(gb|tb|mah|inch|in|cm|ml|l|kg|g|w)\b", re.I)
+_UNIT_AFTER = re.compile(r"\s*(gb|tb|mah|inch|in|cm|ml|l|kg|g|w|hz|k|st|star|rpm|nits)\b", re.I)
 
 
 def _tokens(text: str) -> list[str]:
     text = text.lower()
     text = re.sub(r"[^a-z0-9 ]", " ", text)
     return [t for t in text.split() if t and t not in _STOP]
+
+
+def _model_numbers(text: str) -> set[str]:
+    """Standalone numbers that identify a model/generation (e.g. the 7 in
+    'Pixel 7', the 15 in 'iPhone 15'). Excludes capacities/sizes ('256 GB'),
+    ratings ('4.5') and other unit-bound numbers, which aren't model identity.
+    This is what stops 'Pixel 7' from matching 'Pixel 10'."""
+    t = text.lower()
+    nums: set[str] = set()
+    for m in re.finditer(r"\b\d{1,4}\b", t):
+        s, e = m.start(), m.end()
+        if (s > 0 and t[s - 1] == ".") or (e < len(t) and t[e] == "."):
+            continue                                   # part of a decimal, e.g. 4.5
+        if _UNIT_AFTER.match(t[e:e + 6]):
+            continue                                   # 256 GB, 5 star, etc.
+        nums.add(m.group(0))
+    return nums
 
 
 def relevance_score(query: str, title: str) -> float:
@@ -44,6 +62,14 @@ def relevance_score(query: str, title: str) -> float:
             base = min(100.0, base + 8)
         elif t_units:                       # different unit present => likely wrong variant
             base -= 12
+    # Model / generation numbers are identity-critical: 'Pixel 7' != 'Pixel 10'.
+    q_models = _model_numbers(query)
+    if q_models:
+        t_models = _model_numbers(title)
+        if q_models & t_models:
+            base = min(100.0, base + 10)    # same generation -> strong signal
+        else:
+            base -= 45                      # wrong/missing model number -> reject
     return max(0.0, min(100.0, base))
 
 
