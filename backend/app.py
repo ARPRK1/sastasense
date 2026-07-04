@@ -54,6 +54,11 @@ def health():
     return {"ok": True, "live_scraping": config.LIVE_SCRAPING}
 
 
+@app.get("/api/categories")
+def api_categories():
+    return aggregator.CATEGORIES
+
+
 @app.get("/api/search")
 def api_search(q: str):
     if not q or len(q.strip()) < 2:

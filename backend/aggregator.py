@@ -1,10 +1,9 @@
-"""Aggregation layer: run all store scrapers, clean/rank results, persist prices.
+"""Aggregation layer: run store scrapers, clean/rank results, persist prices.
 
-This is where the four improvements come together:
-- accuracy:   drop irrelevant listings (matcher) + tag every price with freshness
-- history:    every observed price is written to price_history
-- deal score: compare current price to the item's own history + MRP
-- (alerts consume the fresh prices recorded here)
+Ranking rule (fixes the 'fake product' bug):
+  * LIVE results always take priority. Demo/sample data is used ONLY when every
+    live store returned nothing, and is clearly labelled. Demo never mixes with,
+    or outranks, real listings.
 """
 from __future__ import annotations
 import logging
@@ -30,6 +29,18 @@ _LIVE = {
     "Reliance Digital": RelianceDigitalScraper,
 }
 
+# Curated browse categories (each maps to a search term the engine understands).
+CATEGORIES = [
+    {"label": "Mobiles", "icon": "📱", "q": "smartphone"},
+    {"label": "Laptops", "icon": "💻", "q": "laptop"},
+    {"label": "Headphones", "icon": "🎧", "q": "headphone"},
+    {"label": "Smartwatches", "icon": "⌚", "q": "smartwatch"},
+    {"label": "Televisions", "icon": "📺", "q": "tv"},
+    {"label": "Tablets", "icon": "📲", "q": "ipad"},
+    {"label": "Air Conditioners", "icon": "❄️", "q": "ac"},
+    {"label": "Home Appliances", "icon": "🧺", "q": "washing machine"},
+]
+
 
 def freshness(age_seconds: float) -> str:
     if age_seconds <= config.FRESH_SECONDS:
@@ -39,59 +50,72 @@ def freshness(age_seconds: float) -> str:
     return "stale"
 
 
-def _search_store(store: str, query: str) -> list[Offer]:
-    offers: list[Offer] = []
-    if config.LIVE_SCRAPING:
-        try:
-            offers = _LIVE[store]().safe_search(query)
-        except Exception as e:                       # noqa: BLE001
-            log.warning("live %s failed: %s", store, e)
-    if not offers and config.DEMO_FALLBACK:
-        offers = DemoScraper(store).safe_search(query)
-    return offers
+def _live_store(store: str, query: str) -> list[Offer]:
+    try:
+        return _LIVE[store]().safe_search(query)
+    except Exception as e:                            # noqa: BLE001
+        log.warning("live %s failed: %s", store, e)
+        return []
+
+
+def _relevant_priced(query: str, offers: list[Offer]) -> list[Offer]:
+    out = []
+    for o in offers:
+        if o.price is None:
+            continue
+        if not matcher.is_relevant(query, o.title):
+            continue
+        out.append(o)
+    return out
 
 
 def deal_score(price, stats: dict, mrp) -> dict:
-    """Turn history into a plain-English 'is this a genuine deal?' verdict.
+    """Plain-English 'is this a genuine deal?' verdict from the item's OWN history.
 
-    Directly answers BuyHatke's most-loved use case: 'is the discount real or an
-    inflated-MRP trick?'  Uses the item's OWN observed prices, not the MRP.
+    Needs a few data points before it will make a confident claim, so brand-new
+    items say 'Building price history' instead of falsely 'Lowest ever'.
     """
-    lowest, median = stats.get("lowest"), stats.get("median")
-    verdict, label = "unknown", "Not enough history yet"
-    if price and lowest and median:
-        if price <= lowest * 1.01:
-            verdict, label = "great", "Lowest price we've seen"
-        elif price <= median * 0.95:
-            verdict, label = "good", "Below its usual price"
-        elif price <= median * 1.02:
-            verdict, label = "typical", "Around its usual price"
-        else:
-            verdict, label = "high", "Pricier than usual"
-    # Flag inflated-MRP discounts (big MRP gap but not actually cheap historically)
-    inflated = bool(mrp and median and mrp > median * 1.25 and price and price >= median)
+    lowest, median, count = stats.get("lowest"), stats.get("median"), stats.get("count", 0)
+    if not price or count < 4 or not lowest or not median:
+        return {"verdict": "new", "label": "Building price history",
+                "inflated_mrp": False, "lowest": lowest, "median": median}
+    if price <= lowest * 1.01:
+        verdict, label = "great", "Lowest price we've seen"
+    elif price <= median * 0.95:
+        verdict, label = "good", "Below its usual price"
+    elif price <= median * 1.02:
+        verdict, label = "typical", "Around its usual price"
+    else:
+        verdict, label = "high", "Pricier than usual"
+    inflated = bool(mrp and median and mrp > median * 1.25 and price >= median)
     return {"verdict": verdict, "label": label, "inflated_mrp": inflated,
             "lowest": lowest, "median": median}
 
 
 def search(query: str) -> dict:
-    """Full search -> ranked, de-duplicated, history-aware results."""
+    """Full search -> ranked, de-duplicated, history-aware results (live-first)."""
     stores = list(_LIVE.keys())
+
+    # 1) Try LIVE across all stores in parallel.
     with ThreadPoolExecutor(max_workers=len(stores)) as ex:
-        results = list(ex.map(lambda s: _search_store(s, query), stores))
+        live_lists = list(ex.map(lambda s: _live_store(s, query), stores))
+    live_offers = _relevant_priced(query, [o for lst in live_lists for o in lst])
 
-    all_offers: list[Offer] = []
-    for store_offers in results:
-        for o in store_offers:
-            if o.price is None:
-                continue
-            if not matcher.is_relevant(query, o.title):
-                continue
-            all_offers.append(o)
+    # 2) Only if NOTHING came back live, fall back to labelled demo data.
+    using_demo = False
+    if live_offers:
+        offers = live_offers
+    elif config.DEMO_FALLBACK:
+        demo = []
+        for s in stores:
+            demo += DemoScraper(s).safe_search(query)
+        offers = _relevant_priced(query, demo)
+        using_demo = bool(offers)
+    else:
+        offers = []
 
-    live_count = sum(1 for o in all_offers if o.source == "live")
     items = []
-    for o in all_offers:
+    for o in offers:
         key = matcher.group_key(o.store, o.title)
         pid = db.upsert_product(key, o.store, o.title, o.url, o.image)
         db.record_price(pid, o.price, o.mrp, o.in_stock, o.source)
@@ -104,9 +128,7 @@ def search(query: str) -> dict:
         d["deal"] = deal_score(o.price, stats, o.mrp)
         items.append(d)
 
-    # Sort: relevance first, then cheapest.
     items.sort(key=lambda x: (-x["relevance"], x["price"]))
-
     best = min((i["price"] for i in items), default=None)
     for i in items:
         i["is_best_price"] = (i["price"] == best)
@@ -114,15 +136,14 @@ def search(query: str) -> dict:
     return {
         "query": query,
         "count": len(items),
-        "live_results": live_count,
-        "using_demo": live_count == 0,
+        "live_results": 0 if using_demo else len(items),
+        "using_demo": using_demo,
         "generated_at": time.time(),
         "items": items,
     }
 
 
 def refresh_product(product_id: int) -> dict | None:
-    """Re-fetch one tracked product's current price and record it (for alerts)."""
     p = db.get_product(product_id)
     if not p:
         return None
@@ -130,7 +151,6 @@ def refresh_product(product_id: int) -> dict | None:
     for i in res["items"]:
         if i["product_id"] == product_id:
             return i
-    # Fall back to the closest match in the same store.
     for i in res["items"]:
         if i["store"] == p["store"]:
             return i
