@@ -1,0 +1,161 @@
+/* Clean, fast, ad-free UI — the direct answer to BuyHatke's clutter complaints. */
+:root {
+  --bg: #0f1220;
+  --surface: #1a1f36;
+  --surface-2: #232a49;
+  --text: #eef1f7;
+  --muted: #9aa3c0;
+  --accent: #5b8cff;
+  --green: #2ecc71;
+  --amber: #f5a623;
+  --red: #ff6b6b;
+  --border: #2c3358;
+  --radius: 14px;
+  --shadow: 0 6px 24px rgba(0,0,0,.28);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f4f6fb; --surface: #ffffff; --surface-2: #f0f3fa; --text: #1a1f36;
+    --muted: #5b6480; --border: #e2e7f2; --shadow: 0 6px 20px rgba(30,40,80,.08);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+h1,h2,h3,h4 { margin: 0; }
+button { cursor: pointer; font: inherit; }
+.hidden { display: none !important; }
+.muted { color: var(--muted); }
+
+/* Top bar */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 14px 22px; background: var(--surface);
+  border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 5;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo { font-size: 30px; }
+.topbar h1 { font-size: 20px; letter-spacing: .2px; }
+.tag { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+nav { display: flex; gap: 8px; }
+.navbtn {
+  background: transparent; color: var(--muted); border: 1px solid transparent;
+  padding: 8px 14px; border-radius: 10px; font-weight: 600;
+}
+.navbtn.active, .navbtn:hover { background: var(--surface-2); color: var(--text); }
+.pill {
+  background: var(--accent); color: #fff; border-radius: 999px;
+  padding: 0 7px; font-size: 11px; margin-left: 4px;
+}
+
+/* Layout */
+.view { max-width: 1040px; margin: 26px auto; padding: 0 18px; }
+
+/* Search bar */
+.searchbar { display: flex; gap: 10px; }
+.searchbar input {
+  flex: 1; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text); font-size: 15px; outline: none;
+}
+.searchbar input:focus { border-color: var(--accent); }
+.searchbar button {
+  padding: 0 22px; border: none; border-radius: 12px; background: var(--accent);
+  color: #fff; font-weight: 700;
+}
+.statusline { margin: 14px 2px; font-size: 13px; color: var(--muted); min-height: 18px; }
+
+/* Empty state */
+.empty { text-align: center; color: var(--muted); margin-top: 40px; }
+.chip {
+  background: var(--surface-2); color: var(--text); border: 1px solid var(--border);
+  border-radius: 999px; padding: 6px 12px; margin: 4px; font-size: 13px;
+}
+.hint { margin-top: 12px; }
+
+/* Results */
+.results { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 14px; }
+.card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow);
+  transition: transform .12s ease, border-color .12s ease;
+}
+.card:hover { transform: translateY(-2px); border-color: var(--accent); }
+.card.best { border-color: var(--green); }
+.card-top { display: flex; gap: 12px; }
+.card img { width: 68px; height: 68px; object-fit: contain; border-radius: 10px; background:#fff; }
+.card-title { font-size: 14px; font-weight: 600; line-height: 1.35;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.store-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+.store-tag { font-weight: 700; color: var(--text); }
+.price-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.price { font-size: 22px; font-weight: 800; }
+.mrp { text-decoration: line-through; color: var(--muted); font-size: 13px; }
+.disc { color: var(--green); font-weight: 700; font-size: 13px; }
+.badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+.b-best { background: rgba(46,204,113,.15); color: var(--green); }
+.b-fresh { background: rgba(91,140,255,.16); color: var(--accent); }
+.b-recent { background: rgba(245,166,35,.16); color: var(--amber); }
+.b-stale { background: rgba(255,107,107,.16); color: var(--red); }
+.b-demo { background: var(--surface-2); color: var(--muted); }
+.b-great { background: rgba(46,204,113,.15); color: var(--green); }
+.b-good { background: rgba(46,204,113,.12); color: var(--green); }
+.b-typical { background: var(--surface-2); color: var(--muted); }
+.b-high { background: rgba(255,107,107,.15); color: var(--red); }
+.b-inflated { background: rgba(245,166,35,.16); color: var(--amber); }
+.card-actions { display: flex; gap: 8px; margin-top: auto; }
+.card-actions a, .card-actions button {
+  flex: 1; text-align: center; text-decoration: none; padding: 9px; border-radius: 10px;
+  font-weight: 700; font-size: 13px; border: 1px solid var(--border);
+}
+.btn-buy { background: var(--accent); color: #fff; border: none; }
+.btn-track { background: var(--surface-2); color: var(--text); }
+
+/* Modal */
+.modal { position: fixed; inset: 0; background: rgba(5,8,20,.6); display: flex;
+  align-items: center; justify-content: center; padding: 18px; z-index: 20; }
+.modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+  width: min(680px,100%); max-height: 90vh; overflow: auto; padding: 22px; position: relative; box-shadow: var(--shadow); }
+.modal-close { position: absolute; top: 12px; right: 14px; background: var(--surface-2);
+  border: none; color: var(--text); width: 32px; height: 32px; border-radius: 8px; }
+.modal-head { display: flex; gap: 14px; margin-bottom: 14px; }
+.modal-head img { width: 84px; height: 84px; object-fit: contain; background:#fff; border-radius: 12px; }
+.deal-badge { margin-top: 8px; display: inline-block; font-weight: 700; padding: 5px 10px; border-radius: 999px; font-size: 13px; }
+.chart-wrap { background: var(--surface-2); border-radius: 12px; padding: 12px; height: 260px; }
+.stats-row { display: flex; gap: 10px; margin: 14px 0; flex-wrap: wrap; }
+.stat { flex: 1; min-width: 120px; background: var(--surface-2); border-radius: 12px; padding: 10px 12px; }
+.stat .k { font-size: 12px; color: var(--muted); }
+.stat .v { font-size: 18px; font-weight: 800; }
+
+/* Alert box */
+.alert-box { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 16px; }
+.alert-form { display: flex; gap: 8px; align-items: center; margin: 10px 0; flex-wrap: wrap; }
+.alert-form .rupee { font-weight: 800; }
+.alert-form input { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text); }
+.alert-form input#targetPrice { width: 130px; }
+.alert-form input#alertEmail { flex: 1; min-width: 160px; }
+.alert-form button { background: var(--accent); color: #fff; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; }
+.mini-alerts, .alerts-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.mini-alert, .alert-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--surface-2); border-radius: 10px; padding: 10px 12px; font-size: 14px;
+}
+.alert-item img { width: 40px; height: 40px; object-fit: contain; background:#fff; border-radius: 8px; }
+.alert-item .info { flex: 1; }
+.alert-del { background: transparent; border: 1px solid var(--border); color: var(--red);
+  border-radius: 8px; padding: 6px 10px; font-weight: 700; }
+.state-tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.state-active { background: rgba(91,140,255,.16); color: var(--accent); }
+.state-fired { background: rgba(46,204,113,.16); color: var(--green); }
+
+/* Toast + footer */
+.toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+  background: var(--surface); border: 1px solid var(--border); color: var(--text);
+  padding: 12px 18px; border-radius: 12px; box-shadow: var(--shadow); z-index: 40; font-weight: 600; }
+.foot { text-align: center; color: var(--muted); font-size: 12px; padding: 24px; }
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--muted);
+  border-top-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px; }
+@keyframes spin { to { transform: rotate(360deg); } }

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SastaSense — smart India price comparison</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">🛍️</span>
+      <div>
+        <h1>SastaSense</h1>
+        <p class="tag">Smart price sense • honest deal check • reliable price-drop alerts</p>
+      </div>
+    </div>
+    <nav>
+      <button class="navbtn active" data-view="search">Search</button>
+      <button class="navbtn" data-view="alerts">My Alerts <span id="alertCount" class="pill"></span></button>
+    </nav>
+  </header>
+
+  <!-- SEARCH VIEW -->
+  <main id="view-search" class="view">
+    <form id="searchForm" class="searchbar">
+      <input id="searchInput" type="text" placeholder="Search a product, e.g. iPhone 15, Sony headphones, 55 inch TV" autocomplete="off" />
+      <button type="submit">Search</button>
+    </form>
+
+    <div id="statusLine" class="statusline"></div>
+    <div id="results" class="results"></div>
+    <div id="emptyState" class="empty">
+      <p>Search any product to compare live prices across Amazon.in, Flipkart, Croma and Reliance Digital.</p>
+      <p class="hint">Try: <button class="chip">iPhone 15</button><button class="chip">Sony headphones</button><button class="chip">55 inch TV</button><button class="chip">Samsung Galaxy</button></p>
+    </div>
+  </main>
+
+  <!-- ALERTS VIEW -->
+  <main id="view-alerts" class="view hidden">
+    <h2>My price alerts</h2>
+    <p class="muted">You get notified the moment a tracked product hits your target. Set as many targets per product as you like.</p>
+    <div id="alertsList" class="alerts-list"></div>
+  </main>
+
+  <!-- PRODUCT / HISTORY MODAL -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <button id="modalClose" class="modal-close">✕</button>
+      <div class="modal-head">
+        <img id="mImg" alt="" />
+        <div>
+          <h3 id="mTitle"></h3>
+          <div id="mMeta" class="muted"></div>
+          <div id="mDeal" class="deal-badge"></div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="historyChart"></canvas></div>
+      <div id="mStats" class="stats-row"></div>
+
+      <div class="alert-box">
+        <h4>Notify me when price drops to</h4>
+        <div class="alert-form">
+          <span class="rupee">₹</span>
+          <input id="targetPrice" type="number" min="1" placeholder="target price" />
+          <input id="alertEmail" type="email" placeholder="email (optional)" />
+          <button id="addAlertBtn">Add alert</button>
+        </div>
+        <div id="productAlerts" class="mini-alerts"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <footer class="foot">
+    <span id="footInfo"></span>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
