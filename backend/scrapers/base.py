@@ -7,6 +7,7 @@ aggregator then fills the gap from the demo provider.
 """
 from __future__ import annotations
 import re
+import time
 import logging
 import httpx
 
@@ -45,15 +46,20 @@ class BaseScraper:
             )
         return self._client
 
-    def get(self, url: str, params: dict | None = None) -> httpx.Response | None:
-        try:
-            r = self.client.get(url, params=params)
-            if r.status_code == 200 and len(r.text) > 500:
-                return r
-            log.warning("%s: bad response %s (%d bytes)",
-                        self.store_name, r.status_code, len(r.text))
-        except Exception as e:                       # noqa: BLE001
-            log.warning("%s: request failed: %s", self.store_name, e)
+    def get(self, url: str, params: dict | None = None, retries: int = 1
+            ) -> httpx.Response | None:
+        for attempt in range(retries + 1):
+            try:
+                r = self.client.get(url, params=params)
+                if r.status_code == 200 and len(r.text) > 500:
+                    return r
+                log.warning("%s: bad response %s (%d bytes) [try %d]",
+                            self.store_name, r.status_code, len(r.text), attempt + 1)
+            except Exception as e:                   # noqa: BLE001
+                log.warning("%s: request failed [try %d]: %s",
+                            self.store_name, attempt + 1, e)
+            if attempt < retries:
+                time.sleep(0.6)
         return None
 
     def search(self, query: str) -> list[Offer]:
