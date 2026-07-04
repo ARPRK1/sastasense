@@ -1,0 +1,16 @@
+# Render.com blueprint — deploys SastaSense as a free web service.
+# In Render: New + -> Blueprint -> pick your repo. This file does the rest.
+services:
+  - type: web
+    name: sastasense
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: LIVE_SCRAPING
+        value: "true"
+      - key: DEMO_FALLBACK
+        value: "true"
+      - key: REFRESH_INTERVAL_MIN
+        value: "60"
