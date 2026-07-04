@@ -48,3 +48,14 @@ DEFAULT_HEADERS = {
 
 # Stores we know how to search. Order = display order.
 STORES = ["Amazon.in", "Flipkart", "Croma", "Reliance Digital"]
+
+# ---- Monetisation (affiliate commissions) ----
+# Set these as environment variables in Render after signing up (both free).
+# AMAZON_ASSOC_TAG: your Amazon Associates tracking id, e.g. "sastasense-21".
+#   Appended to every Amazon.in "Buy" link so purchases earn commission.
+# CUELINKS_CID: your Cuelinks channel id (cuelinks.com dashboard). A tiny script
+#   loads on the site and auto-affiliatizes outbound links to Flipkart, Croma,
+#   Reliance, Myntra, Ajio and 1000s more — including programs you can't join
+#   directly. This is the one-signup way to monetise every store at once.
+AMAZON_ASSOC_TAG = os.getenv("AMAZON_ASSOC_TAG", "")
+CUELINKS_CID = os.getenv("CUELINKS_CID", "")

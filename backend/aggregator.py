@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 import time
 from concurrent.futures import ThreadPoolExecutor
+from urllib.parse import urlparse, urlunparse, urlencode, parse_qsl
 
 import config
 import db
@@ -40,6 +41,23 @@ CATEGORIES = [
     {"label": "Air Conditioners", "icon": "❄️", "q": "ac"},
     {"label": "Home Appliances", "icon": "🧺", "q": "washing machine"},
 ]
+
+
+def affiliate_url(store: str, url: str) -> str:
+    """Turn a plain store link into a commission-earning one.
+
+    Amazon.in gets the Associates tag appended directly (best rates). Other
+    stores are monetised automatically by the Cuelinks script on the frontend,
+    so their URLs are returned unchanged here."""
+    try:
+        if store == "Amazon.in" and config.AMAZON_ASSOC_TAG and "amazon." in url:
+            p = urlparse(url)
+            q = dict(parse_qsl(p.query))
+            q["tag"] = config.AMAZON_ASSOC_TAG
+            return urlunparse(p._replace(query=urlencode(q)))
+    except Exception:                                 # noqa: BLE001
+        pass
+    return url
 
 
 def freshness(age_seconds: float) -> str:
@@ -121,6 +139,7 @@ def search(query: str) -> dict:
         db.record_price(pid, o.price, o.mrp, o.in_stock, o.source)
         stats = db.price_stats(pid)
         d = o.to_dict()
+        d["url"] = affiliate_url(o.store, d["url"])
         d["product_id"] = pid
         d["group"] = matcher.cross_store_group(o.title)
         d["relevance"] = round(matcher.relevance_score(query, o.title))

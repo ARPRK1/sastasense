@@ -51,7 +51,8 @@ class WatchIn(BaseModel):
 # ------------------------------------------------------------------ routes
 @app.get("/api/health")
 def health():
-    return {"ok": True, "live_scraping": config.LIVE_SCRAPING}
+    return {"ok": True, "live_scraping": config.LIVE_SCRAPING,
+            "cuelinks_cid": config.CUELINKS_CID}
 
 
 @app.get("/api/categories")
