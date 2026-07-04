@@ -218,4 +218,14 @@ fetch(`${API}/api/health`).then((r) => r.json()).then((h) => {
   $("#footInfo").textContent = h.live_scraping
     ? "Live scraping on • sample data shown only if a store blocks the request"
     : "Demo mode • set LIVE_SCRAPING=true for real prices";
+  // Monetisation: if a Cuelinks channel id is configured, load the Cuelinks
+  // script so outbound "Buy" links to Flipkart/Croma/Reliance/Myntra/etc. earn
+  // affiliate commission automatically. Amazon links are tagged server-side.
+  if (h.cuelinks_cid) {
+    var cl = document.createElement("script");
+    cl.src = "https://cdn0.cuelinks.com/js/cuelinks.js";
+    cl.async = true;
+    cl.setAttribute("data-cid", h.cuelinks_cid);
+    document.body.appendChild(cl);
+  }
 }).catch(() => { $("#footInfo").textContent = ""; });
