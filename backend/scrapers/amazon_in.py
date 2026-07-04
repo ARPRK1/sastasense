@@ -26,19 +26,35 @@ class AmazonInScraper(BaseScraper):
         soup = BeautifulSoup(r.text, "lxml")
         offers: list[Offer] = []
         for card in soup.select('div[data-component-type="s-search-result"]'):
-            title_el = card.select_one("h2 a span") or card.select_one("h2 span")
-            link_el = card.select_one("h2 a") or card.select_one("a.a-link-normal")
-            if not title_el or not link_el:
+            link_el = (card.select_one("h2 a")
+                       or card.select_one("a.a-link-normal.s-line-clamp-2")
+                       or card.select_one("a.a-link-normal.s-no-outline")
+                       or card.select_one("a.a-link-normal"))
+            img_el = card.select_one("img.s-image")
+            if not link_el:
+                continue
+            # Robust title extraction (Amazon's markup varies and sometimes the
+            # h2 span holds only the brand). Prefer the h2 text; if that's too
+            # short, fall back to the product image's alt (the full product name),
+            # then the link text.
+            title = ""
+            h2 = card.select_one("h2")
+            if h2:
+                title = h2.get_text(" ", strip=True)
+            if len(title) < 12 and img_el and img_el.get("alt"):
+                title = img_el.get("alt").strip()
+            if len(title) < 4:
+                title = link_el.get_text(" ", strip=True)
+            if len(title) < 4:
                 continue
             price_el = card.select_one("span.a-price > span.a-offscreen")
             mrp_el = card.select_one(
                 "span.a-price.a-text-price > span.a-offscreen")
-            img_el = card.select_one("img.s-image")
             rating_el = card.select_one("span.a-icon-alt")
             price = parse_price(price_el.get_text()) if price_el else None
             offers.append(Offer(
                 store=self.store_name,
-                title=title_el.get_text(strip=True),
+                title=title,
                 price=price,
                 mrp=parse_price(mrp_el.get_text()) if mrp_el else None,
                 url=urljoin(BASE, link_el.get("href", "")),
