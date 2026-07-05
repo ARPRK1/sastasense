@@ -10,7 +10,7 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, Response
 from pydantic import BaseModel
 
 import config
@@ -141,10 +141,36 @@ def api_alerts_check():
     return {"fired": alerts.check_all()}
 
 
+# --------------------------------------------------------- SEO endpoints
+@app.get("/robots.txt", response_class=PlainTextResponse)
+def robots():
+    return f"User-agent: *\nAllow: /\nSitemap: {config.SITE_URL}/sitemap.xml\n"
+
+
+@app.get("/sitemap.xml")
+def sitemap():
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+        f'<url><loc>{config.SITE_URL}/</loc>'
+        '<changefreq>daily</changefreq><priority>1.0</priority></url>'
+        '</urlset>'
+    )
+    return Response(content=xml, media_type="application/xml")
+
+
 # --------------------------------------------------------- serve frontend
 if os.path.isdir(FRONTEND_DIR):
     app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
-    @app.get("/")
+    @app.get("/", response_class=HTMLResponse)
     def index():
-        return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
+        with open(os.path.join(FRONTEND_DIR, "index.html"), encoding="utf-8") as f:
+            html = f.read()
+        # Inject the Google Search Console verification tag (from env) so the
+        # site can be verified without a code change.
+        if config.GOOGLE_SITE_VERIFICATION:
+            tag = ('<meta name="google-site-verification" content="'
+                   f'{config.GOOGLE_SITE_VERIFICATION}" />')
+            html = html.replace("</head>", tag + "\n</head>", 1)
+        return HTMLResponse(html)

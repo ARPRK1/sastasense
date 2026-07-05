@@ -59,3 +59,11 @@ STORES = ["Amazon.in", "Flipkart", "Croma", "Reliance Digital"]
 #   directly. This is the one-signup way to monetise every store at once.
 AMAZON_ASSOC_TAG = os.getenv("AMAZON_ASSOC_TAG", "")
 CUELINKS_CID = os.getenv("CUELINKS_CID", "")
+
+# ---- SEO ----
+# Public URL of the site (used in sitemap/robots).
+SITE_URL = os.getenv("SITE_URL", "https://sastasense.onrender.com")
+# Paste the token Google Search Console gives you (HTML-tag method) here as an
+# env var; it's injected into the homepage <head> so you can verify ownership
+# WITHOUT a code change.
+GOOGLE_SITE_VERIFICATION = os.getenv("GOOGLE_SITE_VERIFICATION", "")
