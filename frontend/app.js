@@ -40,6 +40,7 @@ $("#searchForm").addEventListener("submit", (e) => { e.preventDefault(); doSearc
 
 async function doSearch(queryOverride) {
   const q = (queryOverride || $("#searchInput").value).trim();
+  if (typeof gtag === "function" && q) gtag('event', 'search', { search_term: q });   // GA4: tracks what people search
   if (q.length < 2) return;
   $("#resultsSection").classList.remove("hidden");
   $("#results").innerHTML = "";
@@ -167,7 +168,10 @@ $("#addAlertBtn").addEventListener("click", async () => {
   if (!target || target <= 0) return toast("Enter a valid target price");
   const body = { product_id: currentProduct.pid, kind: "price", target_price: target, email: $("#alertEmail").value.trim() };
   const r = await fetch(`${API}/api/alerts`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  if (r.ok) { toast("Alert set — we’ll watch this price for you ✅"); openProduct(currentProduct.pid, currentProduct.item); refreshAlertCount(); }
+  if (r.ok) {
+    if (typeof gtag === "function") gtag('event', 'add_price_alert');   // GA4: tracks alert sign-ups
+    toast("Alert set — we’ll watch this price for you ✅"); openProduct(currentProduct.pid, currentProduct.item); refreshAlertCount();
+  }
   else toast("Could not set alert");
 });
 
@@ -210,6 +214,21 @@ function escapeHTML(s) { return (s || "").replace(/[&<>"]/g, (c) => ({ "&": "&am
 function escapeAttr(s) { return escapeHTML(s).replace(/'/g, "&#39;"); }
 let toastTimer;
 function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.remove("hidden"); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.add("hidden"), 2600); }
+
+/* ---------- GA4: track outbound "Buy" clicks (your revenue signal) ---------- */
+document.addEventListener('click', function (e) {
+  var buy = e.target.closest && e.target.closest('.btn-buy');
+  if (buy && typeof gtag === 'function') {
+    var card = buy.closest('.card');
+    var title = card ? (card.querySelector('.card-title') || {}).textContent : '';
+    var price = card ? (card.querySelector('.price') || {}).textContent : '';
+    gtag('event', 'buy_click', {
+      item_name: (title || '').slice(0, 100),
+      price: price || '',
+      store: (buy.getAttribute('href') || '').includes('flipkart') ? 'Flipkart' : 'Amazon'
+    });
+  }
+}, true);
 
 /* ---------- init ---------- */
 loadCategories();
