@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 import time
 from concurrent.futures import ThreadPoolExecutor
-from urllib.parse import urlparse, urlunparse, urlencode, parse_qsl
+from urllib.parse import urlparse, urlunparse, urlencode, parse_qsl, quote
 
 import config
 import db
@@ -46,15 +46,19 @@ CATEGORIES = [
 def affiliate_url(store: str, url: str) -> str:
     """Turn a plain store link into a commission-earning one.
 
-    Amazon.in gets the Associates tag appended directly (best rates). Other
-    stores are monetised automatically by the Cuelinks script on the frontend,
-    so their URLs are returned unchanged here."""
+    Amazon.in gets the Associates tag appended directly (best rates).
+    Other stores: if AFFILIATE_WRAP_TEMPLATE is set (must contain {url}),
+    wrap the destination. Otherwise leave bare (Cuelinks JS can still
+    monetise them when CUELINKS_CID is set on the frontend)."""
     try:
         if store == "Amazon.in" and config.AMAZON_ASSOC_TAG and "amazon." in url:
             p = urlparse(url)
             q = dict(parse_qsl(p.query))
             q["tag"] = config.AMAZON_ASSOC_TAG
             return urlunparse(p._replace(query=urlencode(q)))
+        tmpl = (config.AFFILIATE_WRAP_TEMPLATE or "").strip()
+        if tmpl and "{url}" in tmpl and store != "Amazon.in":
+            return tmpl.replace("{url}", quote(url, safe=""))
     except Exception:                                 # noqa: BLE001
         pass
     return url

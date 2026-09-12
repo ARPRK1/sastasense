@@ -51,8 +51,20 @@ class WatchIn(BaseModel):
 # ------------------------------------------------------------------ routes
 @app.get("/api/health")
 def health():
-    return {"ok": True, "live_scraping": config.LIVE_SCRAPING,
-            "cuelinks_cid": config.CUELINKS_CID}
+    # cuelinks_cid stays as the raw value because frontend app.js needs it
+    # to load the Cuelinks script. Booleans let ops see status without
+    # scraping secrets from logs.
+    return {
+        "ok": True,
+        "live_scraping": config.LIVE_SCRAPING,
+        "cuelinks_cid": config.CUELINKS_CID,
+        "amazon_tag_set": bool(config.AMAZON_ASSOC_TAG),
+        "cuelinks_cid_set": bool(config.CUELINKS_CID),
+        "affiliate_wrap_set": bool(
+            (config.AFFILIATE_WRAP_TEMPLATE or "").strip()
+            and "{url}" in (config.AFFILIATE_WRAP_TEMPLATE or "")
+        ),
+    }
 
 
 @app.get("/api/categories")

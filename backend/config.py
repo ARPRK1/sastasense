@@ -59,6 +59,11 @@ STORES = ["Amazon.in", "Flipkart", "Croma", "Reliance Digital"]
 #   directly. This is the one-signup way to monetise every store at once.
 AMAZON_ASSOC_TAG = os.getenv("AMAZON_ASSOC_TAG", "")
 CUELINKS_CID = os.getenv("CUELINKS_CID", "")
+# Optional server-side wrap for non-Amazon Buy links (Flipkart/Croma/Reliance).
+# Put a template with "{url}" (destination will be URL-encoded). Leave empty to
+# leave those URLs bare (Cuelinks JS can still monetise them if CUELINKS_CID is set).
+# NEVER commit a real wrap URL with your publisher id — set it only in Render/.env.
+AFFILIATE_WRAP_TEMPLATE = os.getenv("AFFILIATE_WRAP_TEMPLATE", "")
 
 # ---- SEO ----
 # Public URL of the site (used in sitemap/robots).

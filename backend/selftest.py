@@ -61,6 +61,33 @@ def main():
     check("alert deletion works",
           all(x["id"] != a2 for x in db.alerts_for(pid)))
 
+
+    # 5. Affiliate link builder (env-driven; no real IDs in repo)
+    import config
+    from urllib.parse import quote
+    amazon = aggregator.affiliate_url(
+        "Amazon.in",
+        "https://www.amazon.in/dp/B0TEST?foo=1",
+    )
+    check("Amazon untagged when AMAZON_ASSOC_TAG empty", "tag=" not in amazon)
+    config.AMAZON_ASSOC_TAG = "sastasense-21"
+    amazon2 = aggregator.affiliate_url(
+        "Amazon.in",
+        "https://www.amazon.in/dp/B0TEST?foo=1",
+    )
+    check("Amazon gets Associates tag", "tag=sastasense-21" in amazon2)
+    config.AMAZON_ASSOC_TAG = ""
+    fk = "https://www.flipkart.com/item/p/itm123?pid=ABC"
+    bare = aggregator.affiliate_url("Flipkart", fk)
+    check("Flipkart bare when wrap unset", bare == fk)
+    config.AFFILIATE_WRAP_TEMPLATE = "https://wrap.example/?url={url}"
+    wrapped = aggregator.affiliate_url("Flipkart", fk)
+    check(
+        "Flipkart wrapped when template set",
+        wrapped == "https://wrap.example/?url=" + quote(fk, safe=""),
+    )
+    config.AFFILIATE_WRAP_TEMPLATE = ""
+
     print("\nAll checks passed ✅")
 
 
